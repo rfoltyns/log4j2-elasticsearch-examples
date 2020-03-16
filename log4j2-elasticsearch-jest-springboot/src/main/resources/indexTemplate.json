@@ -1,0 +1,30 @@
+{
+  "index_patterns": [
+    "log4j2-elasticsearch-jest-test*"
+  ],
+  "settings": {
+    "index": {
+      "refresh_interval": "5s"
+    }
+  },
+  "mappings": {
+    "properties": {
+      "loggerName": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text"
+      },
+      "timeMillis": {
+        "type": "date",
+        "format": "epoch_millis"
+      },
+      "thread": {
+        "type": "keyword"
+      },
+      "level": {
+        "type": "keyword"
+      }
+    }
+  }
+}

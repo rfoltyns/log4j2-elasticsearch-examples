@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+        <Console name="CONSOLE" />
+
+        <!-- This configuration is much more verbose than the minimal one (few lines). It's here just to demonstrate the optional features -->
+        <Elasticsearch name="elasticsearch">
+            <RollingIndexName indexName="log4j2-elasticsearch-jest-test" pattern="yyyy-MM-dd-HH" timeZone="Europe/Warsaw" />
+            <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
+            <JacksonJsonLayout>
+                <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
+                <PooledItemSourceFactory poolName="itemPool" itemSizeInBytes="1024" initialPoolSize="6000"
+                                         monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
+                    <UnlimitedResizePolicy resizeFactor="0.6" />
+                </PooledItemSourceFactory>
+            </JacksonJsonLayout>
+            <AsyncBatchDelivery batchSize="2000" deliveryInterval="5000">
+                <!-- Use 'classpath:BOOT-INF/classes/<template file name>' if template file is in the Spring Boot app resources (yes, it's ugly) -->
+                <!-- Use 'classpath:<template file name>' if template file is provided by one of your dependencies -->
+                <IndexTemplate name="log4j2-elasticsearch-jest-example-template" path="classpath:BOOT-INF/classes/indexTemplate.json" />
+                <JestBufferedHttp serverUris="http://localhost:9200"
+                          connTimeout="500"
+                          readTimeout="30000"
+                          maxTotalConnection="8"
+                          defaultMaxTotalConnectionPerRoute="8"
+                          mappingType="_doc">
+                    <PooledItemSourceFactory poolName="batchPool" itemSizeInBytes="2048000" initialPoolSize="3"
+                                             monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
+                        <UnlimitedResizePolicy resizeFactor="0.70" />
+                    </PooledItemSourceFactory>
+                    <BatchLimitBackoffPolicy maxBatchesInFlight="4" />
+                </JestBufferedHttp>
+                <ChronicleMapRetryFailoverPolicy fileName="failedItems.chronicleMap"
+                                               numberOfEntries="100000"
+                                               averageValueSize="2048"
+                                               batchSize="1000"
+                                               retryDelay="4000"
+                                               monitored="true"
+                                               monitorTaskInterval="30000">
+                    <SingleKeySequenceSelector sequenceId="1"/>
+                </ChronicleMapRetryFailoverPolicy>
+            </AsyncBatchDelivery>
+        </Elasticsearch>
+    </Appenders>
+
+    <Loggers>
+        <AsyncLogger name="elasticsearch">
+            <AppenderRef ref="elasticsearch" />
+        </AsyncLogger>
+        <Root level="info">
+            <AppenderRef ref="CONSOLE" />
+        </Root>
+    </Loggers>
+</Configuration>
