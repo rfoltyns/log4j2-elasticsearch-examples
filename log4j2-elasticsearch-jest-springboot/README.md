@@ -15,7 +15,7 @@ mvn clean install
 
 ### Run
 
-Ensure that ES is running at `localhost:9200` or change the [log4j2.xml](https://github.com/rfoltyns/log4j2-elasticsearch-examples/blob/master/src/main/resources/log4j2.xml) file.
+Ensure that ES is running at `localhost:9200` or change the [log4j2.xml](https://github.com/rfoltyns/log4j2-elasticsearch-examples/blob/master/log4j2-elasticsearch-jest-springboot/src/main/resources/log4j2.xml) file.
 
 ```shell
 java -jar -Dhostname=localhost target/log4j2-elasticsearch-jest-springboot-0.0.1-SNAPSHOT.jar
