@@ -4,7 +4,15 @@
         <Console name="CONSOLE" />
         <Elasticsearch name="elasticsearch" messageOnly="true">
             <RollingIndexName indexName="log4j2-elasticsearch-jest-test" pattern="yyyy-MM-dd-HH" timeZone="Europe/London" />
-            <PatternLayout pattern="%m" />
+<!--            <PatternLayout pattern="%m" />-->
+            <JacksonJsonLayout>
+                <VirtualProperty name="uuid" value="$${ctx:uuid:-}"  dynamic="true" />
+                <VirtualProperty name="user" value="$${ctx:username:-}" dynamic="true" />
+                <VirtualProperty name="system" value="FSMC-FE" />
+<!--                <VirtualProperty name="threadId" value="$${event:ThreadId:-}" dynamic="true" />-->
+                <JacksonMixIn targetClass="org.apache.logging.log4j.core.LogEvent"
+                              mixinClass="com.github.rfoltyns.LogEventJacksonJsonMixIn" />
+            </JacksonJsonLayout>
             <AsyncBatchDelivery batchSize="2000" deliveryInterval="5000">
                 <IndexTemplate name="log4j2-elasticsearch-jest-example-template" path="classpath:BOOT-INF/classes/indexTemplate.json" />
                 <JestHttp serverUris="http://localhost:9200" mappingType="_doc"/>
@@ -13,9 +21,9 @@
     </Appenders>
 
     <Loggers>
-        <AsyncLogger name="elasticsearch">
+        <Logger name="elasticsearch">
             <AppenderRef ref="elasticsearch" />
-        </AsyncLogger>
+        </Logger>
         <Root level="info">
             <AppenderRef ref="CONSOLE" />
         </Root>

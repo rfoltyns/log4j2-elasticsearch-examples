@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.logging.LoggingSystem;
@@ -22,12 +23,20 @@ public class Application {
 
         Logger logger = LogManager.getLogger("elasticsearch");
 
-        ObjectMapper objectMapper = new ObjectMapper();
+//        ObjectMapper objectMapper = new ObjectMapper();
+//
+//        DataToSend data = new DataToSend("Hello, World!");
+//        String json = objectMapper.writeValueAsString(data);
+//
+//        logger.info(json);
 
-        DataToSend data = new DataToSend("Hello, World!");
-        String json = objectMapper.writeValueAsString(data);
+        ThreadContext.put("username", UUID.randomUUID().toString());
+        ThreadContext.put("uuid", UUID.randomUUID().toString());
 
-        logger.info(json);
+        logger.info("Hello, World!");
+
+        ThreadContext.remove("username");
+        ThreadContext.remove("uuid");
 
         LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
 
