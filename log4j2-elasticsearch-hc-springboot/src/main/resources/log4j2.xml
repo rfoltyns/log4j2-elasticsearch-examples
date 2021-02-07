@@ -18,7 +18,7 @@
                 <!-- Use 'classpath:BOOT-INF/classes/<template file name>' if template file is in the Spring Boot app resources (yes, it's ugly) -->
                 <!-- Use 'classpath:<template file name>' if template file is provided by one of your dependencies -->
                 <IndexTemplate name="log4j2-elasticsearch-hc-example-template" path="classpath:BOOT-INF/classes/indexTemplate.json" />
-                <HCHttp serverUris="http://localhost:9200"
+                <CustomHCHttp serverUris="http://localhost:9200"
                           connTimeout="500"
                           readTimeout="30000"
                           maxTotalConnections="8">
@@ -27,7 +27,10 @@
                         <UnlimitedResizePolicy resizeFactor="0.70" />
                     </PooledItemSourceFactory>
                     <BatchLimitBackoffPolicy maxBatchesInFlight="4" />
-                </HCHttp>
+                    <Security>
+                        <BasicCredentials username="admin" password="changeme" />
+                    </Security>
+                </CustomHCHttp>
                 <ChronicleMapRetryFailoverPolicy fileName="failedItems.chronicleMap"
                                                  numberOfEntries="100000"
                                                  averageValueSize="2048"
