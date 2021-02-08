@@ -13,7 +13,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <appenders.version>1.4.5</appenders.version>
+        <appenders.version>1.4.6</appenders.version>
     </properties>
 
     <dependencies>

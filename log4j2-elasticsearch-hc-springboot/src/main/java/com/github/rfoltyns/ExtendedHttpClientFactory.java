@@ -1,11 +1,14 @@
-package org.appenders.log4j2.elasticsearch.hc;
+package com.github.rfoltyns;
 
-import com.github.rfoltyns.ExtendedHCRequestFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.nio.conn.NoopIOSessionStrategy;
 import org.apache.http.nio.conn.ssl.SSLIOSessionStrategy;
+import org.appenders.log4j2.elasticsearch.hc.HttpAsyncResponseConsumerFactory;
+import org.appenders.log4j2.elasticsearch.hc.HttpClient;
+import org.appenders.log4j2.elasticsearch.hc.HttpClientFactory;
+import org.appenders.log4j2.elasticsearch.hc.ServerPool;
 
 public class ExtendedHttpClientFactory extends HttpClientFactory {
 

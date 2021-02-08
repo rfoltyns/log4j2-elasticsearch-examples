@@ -1,10 +1,12 @@
-package org.appenders.log4j2.elasticsearch.hc;
+package com.github.rfoltyns;
 
 import org.apache.logging.log4j.core.config.Node;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginBuilderFactory;
 import org.appenders.log4j2.elasticsearch.ClientObjectFactory;
 import org.appenders.log4j2.elasticsearch.ClientProvider;
+import org.appenders.log4j2.elasticsearch.hc.HCHttp;
+import org.appenders.log4j2.elasticsearch.hc.HttpClient;
 
 import java.util.Arrays;
 
