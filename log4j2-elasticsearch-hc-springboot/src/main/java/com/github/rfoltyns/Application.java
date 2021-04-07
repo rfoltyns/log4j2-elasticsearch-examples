@@ -2,11 +2,13 @@ package com.github.rfoltyns;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
@@ -18,7 +20,10 @@ public class Application {
         ConfigurableApplicationContext applicationContext = SpringApplication.run(Application.class, args);
 
         Logger logger = LogManager.getLogger("elasticsearch");
+
+        ThreadContext.put("myFavouriteVariable", UUID.randomUUID().toString());
         logger.info("Hello, World!");
+        ThreadContext.remove("myFavouriteVariable");
 
         LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
 

@@ -9,6 +9,7 @@
             <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
             <JacksonJsonLayout>
                 <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
+                <VirtualProperty name="ctxVariable" value="$${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}" dynamic="true" />
                 <PooledItemSourceFactory poolName="itemPool" itemSizeInBytes="1024" initialPoolSize="6000"
                                          monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
                     <UnlimitedResizePolicy resizeFactor="0.6" />
