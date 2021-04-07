@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+        <Console name="CONSOLE" />
+
+        <!-- This is a minimal configuration compatible with Elasticsearch 7.x (batch and pool sizes and intervals should be adjusted to your needs) -->
+        <Elasticsearch name="elasticsearch">
+            <IndexName indexName="log4j2-elasticsearch-hc-springboot-es-7-test" />
+            <JacksonJsonLayout>
+                <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
+                <VirtualProperty name="ctxVariable" value="$${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}" dynamic="true" />
+                <PooledItemSourceFactory itemSizeInBytes="1024" initialPoolSize="6000" />
+            </JacksonJsonLayout>
+            <AsyncBatchDelivery batchSize="2000" deliveryInterval="1000">
+                <!-- Use 'classpath:BOOT-INF/classes/<template file name>' if template file is in the Spring Boot app resources (yes, it's ugly) -->
+                <!-- Use 'classpath:<template file name>' if template file is provided by one of your dependencies -->
+                <IndexTemplate name="log4j2-elasticsearch-hc-springboot-es-7-test-template" path="classpath:indexTemplate-7.json" />
+                <HCHttp serverUris="http://localhost:9200">
+                    <PooledItemSourceFactory itemSizeInBytes="2048000" initialPoolSize="3" />
+                </HCHttp>
+            </AsyncBatchDelivery>
+        </Elasticsearch>
+    </Appenders>
+
+    <Loggers>
+        <AsyncLogger name="elasticsearch">
+            <AppenderRef ref="elasticsearch" />
+        </AsyncLogger>
+        <Root level="info">
+            <AppenderRef ref="CONSOLE" />
+        </Root>
+    </Loggers>
+</Configuration>

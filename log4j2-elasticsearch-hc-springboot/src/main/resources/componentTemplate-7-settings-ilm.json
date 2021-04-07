@@ -1,0 +1,8 @@
+{
+  "template": {
+    "settings": {
+      "lifecycle.name": "log4j2-elasticsearch-hc-springboot-es-7-test-ilm-policy",
+      "lifecycle.rollover_alias": "log4j2-elasticsearch-hc-springboot-es-7-test"
+    }
+  }
+}
