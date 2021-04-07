@@ -1,0 +1,10 @@
+{
+  "index_patterns": [
+    "log4j2-elasticsearch-jest-springboot-es-7-*"
+  ],
+  "composed_of": [
+    "log4j2-elasticsearch-jest-springboot-es-7-test-settings",
+    "log4j2-elasticsearch-jest-springboot-es-7-test-settings-ilm",
+    "log4j2-elasticsearch-jest-springboot-es-7-test-mappings"
+  ]
+}
