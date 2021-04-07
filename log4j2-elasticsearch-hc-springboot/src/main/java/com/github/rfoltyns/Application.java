@@ -25,7 +25,7 @@ public class Application {
         logger.info("Hello, World!");
         ThreadContext.remove("myFavouriteVariable");
 
-        LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
+        LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(5));
 
         applicationContext.close();
         LoggingSystem.get(logger.getClass().getClassLoader()).getShutdownHandler().run();
