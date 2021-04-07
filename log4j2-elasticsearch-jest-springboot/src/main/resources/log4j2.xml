@@ -7,7 +7,7 @@
         <Elasticsearch name="elasticsearch">
             <RollingIndexName indexName="log4j2-elasticsearch-jest-test" pattern="yyyy-MM-dd-HH" timeZone="Europe/Warsaw" />
             <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
-            <JacksonJsonLayout>
+            <JacksonJsonLayout singleThread="true" afterburner="true">
                 <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
                 <PooledItemSourceFactory poolName="itemPool" itemSizeInBytes="1024" initialPoolSize="6000"
                                          monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
