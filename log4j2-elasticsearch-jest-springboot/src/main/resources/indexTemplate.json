@@ -9,21 +9,12 @@
   },
   "mappings": {
     "properties": {
-      "loggerName": {
-        "type": "keyword"
-      },
-      "message": {
-        "type": "text"
-      },
-      "timeMillis": {
+      "@timestamp": {
         "type": "date",
         "format": "epoch_millis"
       },
-      "thread": {
-        "type": "keyword"
-      },
-      "level": {
-        "type": "keyword"
+      "message": {
+        "type": "text"
       }
     }
   }
