@@ -21,9 +21,14 @@ public class Application {
 
         Logger logger = LogManager.getLogger("elasticsearch");
 
-        ThreadContext.put("myFavouriteVariable", UUID.randomUUID().toString());
-        logger.info("Hello, World!");
-        ThreadContext.remove("myFavouriteVariable");
+        ThreadContext.put("traceId", UUID.randomUUID().toString());
+
+        final RequestLog requestLog = new RequestLog("GET", "/", "queryParam=value", null, null);
+
+        //noinspection PlaceholderCountMatchesArgumentCount
+        logger.info("Fortunately Log4j2 does not discard unmatched params", requestLog);
+
+        ThreadContext.remove("traceId");
 
         LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(5));
 

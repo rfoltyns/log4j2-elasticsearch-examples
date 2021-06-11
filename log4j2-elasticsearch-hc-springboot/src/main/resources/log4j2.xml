@@ -7,9 +7,10 @@
         <Elasticsearch name="elasticsearch">
             <RollingIndexName indexName="log4j2-elasticsearch-hc-springboot-es-7-test" pattern="yyyy-MM-dd-HH" timeZone="Europe/Warsaw" />
             <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
-            <JacksonJsonLayout singleThread="true" afterburner="true">
+            <JacksonJsonLayout afterburner="true">
                 <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
-                <VirtualProperty name="ctxVariable" value="$${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}" dynamic="true" />
+                <VirtualProperty name="trace_id" value="$${ctx:traceId:-notSupportedWithAsyncLogger}" dynamic="true" />
+                <JacksonMixIn targetClass="org.apache.logging.log4j.core.LogEvent" mixInClass="com.github.rfoltyns.CustomLogEventMixIn" />
                 <PooledItemSourceFactory poolName="itemPool" itemSizeInBytes="1024" initialPoolSize="6000"
                                          monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
                     <UnlimitedResizePolicy resizeFactor="0.6" />
@@ -43,9 +44,9 @@
     </Appenders>
 
     <Loggers>
-        <AsyncLogger name="elasticsearch">
+        <Logger name="elasticsearch">
             <AppenderRef ref="elasticsearch" />
-        </AsyncLogger>
+        </Logger>
         <Root level="info">
             <AppenderRef ref="CONSOLE" />
         </Root>
