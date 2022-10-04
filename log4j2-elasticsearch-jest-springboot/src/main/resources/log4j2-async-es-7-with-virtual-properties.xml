@@ -9,6 +9,7 @@
             <JacksonJsonLayout>
                 <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
                 <VirtualProperty name="ctxVariable" value="$${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}" dynamic="true" />
+                <VirtualProperty name="moreJson" value="$${ctx:myStructuredJSON:-notSupportedWithAsyncLogger}" dynamic="true" writeRaw="true"/>
                 <PooledItemSourceFactory itemSizeInBytes="1024" initialPoolSize="6000" />
             </JacksonJsonLayout>
             <AsyncBatchDelivery batchSize="2000" deliveryInterval="1000">
@@ -23,9 +24,9 @@
     </Appenders>
 
     <Loggers>
-        <AsyncLogger name="elasticsearch">
+        <Logger name="elasticsearch">
             <AppenderRef ref="elasticsearch" />
-        </AsyncLogger>
+        </Logger>
         <Root level="info">
             <AppenderRef ref="CONSOLE" />
         </Root>
