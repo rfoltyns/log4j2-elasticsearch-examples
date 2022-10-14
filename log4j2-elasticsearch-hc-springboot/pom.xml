@@ -13,8 +13,9 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <appenders.version>1.5.2</appenders.version>
-        <jackson.version>2.12.0</jackson.version>
+        <appenders.version>1.5.6</appenders.version>
+        <jackson.version>2.13.4</jackson.version>
+        <spring-boot.version>2.7.5</spring-boot.version>
     </properties>
 
     <dependencies>
@@ -39,7 +40,12 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-buffer</artifactId>
-            <version>4.1.32.Final</version>
+            <version>4.1.82.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
+            <version>4.1.82.Final</version>
         </dependency>
         <!-- Because file-backed failover is configured (optional) -->
         <dependency>
@@ -51,16 +57,18 @@
         <dependency>
             <groupId>com.lmax</groupId>
             <artifactId>disruptor</artifactId>
-            <version>3.4.2</version>
+            <version>3.4.4</version>
         </dependency>
         <!-- Log4j2 MUST be provided -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot.version}</version>
             <exclusions>
                 <!-- Because I like Jetty -->
                 <exclusion>
@@ -78,9 +86,20 @@
 
     <build>
         <plugins>
+            <!-- Because spring-boot-starter-parent is not a parent -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.github.rfoltyns.Application</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
