@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>log4j2-elasticsearch-examples</artifactId>
+        <groupId>com.github.rfoltyns</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>log4j2-elasticsearch-ahc-one-jar</artifactId>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <onejar.maven.plugin.version>1.4.4</onejar.maven.plugin.version>
+        <appenders.version>1.6.0-SNAPSHOT</appenders.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.appenders.log4j</groupId>
+            <artifactId>log4j2-elasticsearch-core</artifactId>
+            <version>${appenders.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.appenders.log4j</groupId>
+            <artifactId>log4j2-elasticsearch-ahc</artifactId>
+            <version>${appenders.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-buffer</artifactId>
+            <version>4.1.80.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
+            <version>4.1.80.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.13.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.13.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.13.2</version>
+        </dependency>
+        <!-- Because object pooling is configured (optional) -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-buffer</artifactId>
+            <version>4.1.80.Final</version>
+        </dependency>
+        <!-- Because file-backed failover is configured (optional) -->
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-map</artifactId>
+            <version>3.21ea60</version>
+        </dependency>
+        <!-- Because that's what sends HTTP requests here -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpasyncclient</artifactId>
+            <version>4.1.5</version>
+        </dependency>
+        <!-- Because asynchttpclient can't live without it -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.jolira</groupId>
+                <artifactId>onejar-maven-plugin</artifactId>
+                <version>${onejar.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <mainClass>com.github.rfoltyns.ahc.Application</mainClass>
+                            <onejarVersion>0.97</onejarVersion>
+                            <attachToBuild>false</attachToBuild>
+                        </configuration>
+                        <goals>
+                            <goal>one-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

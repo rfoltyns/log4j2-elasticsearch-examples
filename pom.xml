@@ -20,6 +20,7 @@
         <module>log4j2-elasticsearch-jest-springboot</module>
         <module>log4j2-elasticsearch-hc-springboot</module>
         <module>log4j2-elasticsearch-hc-one-jar</module>
+        <module>log4j2-elasticsearch-ahc-one-jar</module>
     </modules>
 
 </project>
