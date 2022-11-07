@@ -16,9 +16,7 @@
                 </PooledItemSourceFactory>
             </JacksonJsonLayout>
             <AsyncBatchDelivery batchSize="2000" deliveryInterval="1000">
-                <!-- Use 'classpath:BOOT-INF/classes/<template file name>' if template file is in the Spring Boot app resources (yes, it's ugly) -->
-                <!-- Use 'classpath:<template file name>' if template file is provided by one of your dependencies -->
-                <IndexTemplate name="log4j2-elasticsearch-jest-springboot-es-7-test-template" path="classpath:indexTemplate-7.json" />
+                <IndexTemplate name="log4j2-elasticsearch-jest-springboot-es-7-test" path="classpath:indexTemplate-7.json" apiVersion="7" />
                 <JestBufferedHttp serverUris="http://localhost:9200"
                           connTimeout="500"
                           readTimeout="30000"
