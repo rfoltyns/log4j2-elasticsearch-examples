@@ -47,17 +47,28 @@ import org.appenders.log4j2.elasticsearch.ahc.HttpClientProvider;
 import org.appenders.log4j2.elasticsearch.ahc.SyncStepProcessor;
 import org.appenders.log4j2.elasticsearch.backoff.BackoffPolicy;
 import org.appenders.log4j2.elasticsearch.backoff.BatchLimitBackoffPolicy;
+import org.appenders.log4j2.elasticsearch.metrics.BasicMetricOutputsRegistry;
+import org.appenders.log4j2.elasticsearch.metrics.BasicMetricsRegistry;
+import org.appenders.log4j2.elasticsearch.metrics.MetricConfigFactory;
+import org.appenders.log4j2.elasticsearch.metrics.MetricLog;
+import org.appenders.log4j2.elasticsearch.metrics.MetricType;
+import org.appenders.log4j2.elasticsearch.metrics.ScheduledMetricsProcessor;
 
+import java.time.Clock;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 public class Application {
 
+    public static final String MODULE_NAME = "log4j2-elasticsearch-ahc-one-jar";
+
     static {
         InternalLogging.setLogger(createLogger());
     }
 
+    // TODO: configure?
     private static final int BATCH_SIZE = 1024;
     private static final int CONCURRENT_BATCHES = 1;
     private static final int ESTIMATED_ITEM_SIZE_IN_BYTES = 1024;
@@ -109,7 +120,7 @@ public class Application {
 
     private static MillisFormatter createIndexNameFormatter() {
         return new RollingMillisFormatter.Builder()
-                    .withPrefix("log4j2-elasticsearch-one-jar")
+                    .withPrefix(MODULE_NAME)
                     .withSeparator(".")
                     .withPattern("yyyy-MM-dd-ss")
                     .build();
@@ -141,15 +152,15 @@ public class Application {
 
     private static IndexTemplate createIndexTemplate() {
         return new IndexTemplate.Builder()
-                .withApiVersion(7)
-                .withName("log4j2-elasticsearch-programmatic-test-template")
+                .withApiVersion(7) // use 8 for ES8
+                .withName(MODULE_NAME)
                 .withPath("classpath:indexTemplate.json")
                 .build();
     }
 
     private static ClientObjectFactory createClientObjectFactory(PooledItemSourceFactory itemSourceFactory, BackoffPolicy<BatchRequest> backoffPolicy) {
 
-        final ElasticsearchBulkAPI builderFactory = new ElasticsearchBulkAPI(null);
+        final ElasticsearchBulkAPI builderFactory = new ElasticsearchBulkAPI();
 
         final HttpClientProvider clientProvider = new HttpClientProvider(new HttpClientFactory.Builder()
                 .withServerList(Collections.singletonList("http://localhost:9200"))
@@ -163,6 +174,8 @@ public class Application {
                 .withBatchOperations(new AHCBatchOperations(itemSourceFactory, builderFactory))
                 .withBackoffPolicy(backoffPolicy)
                 .withOperationFactory(createSetupOperationFactory(clientProvider))
+                .withName("http-main")
+                .withMetricConfigs(AHCHttp.metricConfigs(true))
                 .build();
     }
 
@@ -203,25 +216,34 @@ public class Application {
                 .withPoolName(poolName)
                 .withInitialPoolSize(initialPoolSize)
                 .withPooledObjectOps(new ByteBufPooledObjectOps(UnpooledByteBufAllocator.DEFAULT, new ByteBufBoundedSizeLimitPolicy(estimatedItemSizeInBytes, estimatedItemSizeInBytes)))
-                .withMonitored(true)
-                .withMonitorTaskInterval(10000)
+                .withMetricConfigs(Arrays.asList(
+                        MetricConfigFactory.createSuppliedConfig(MetricType.COUNT, true, "available"),
+                        MetricConfigFactory.createSuppliedConfig(MetricType.COUNT, true, "total")
+                ))
                 .build();
     }
 
     private static BatchDelivery createBatchDelivery(int batchSize, ClientObjectFactory httpObjectFactory, IndexTemplate indexTemplate, FailoverPolicy failoverPolicy) {
+
+        final BasicMetricOutputsRegistry metricOutputs = new BasicMetricOutputsRegistry();
+        metricOutputs.register(new MetricLog("example-metrics", new ConsoleLogger()));
+
         return AsyncBatchDelivery.newBuilder()
-                    .withClientObjectFactory(httpObjectFactory)
-                    .withBatchSize(batchSize)
-                    .withDeliveryInterval(1000)
-                    .withSetupOpSources(indexTemplate)
-                    .withFailoverPolicy(failoverPolicy)
-                    .withShutdownDelayMillis(10000)
-                    .build();
+                .withClientObjectFactory(httpObjectFactory)
+                .withBatchSize(batchSize)
+                .withDeliveryInterval(1000)
+                .withSetupOpSources(indexTemplate)
+                .withFailoverPolicy(failoverPolicy)
+                .withShutdownDelayMillis(10000)
+                .withMetricProcessor(new ScheduledMetricsProcessor(500, 5000, Clock.systemDefaultZone(), new BasicMetricsRegistry(), metricOutputs))
+                .build();
     }
 
     static class Event {
 
         private final long timestamp = System.currentTimeMillis();
+
+        private final String name = "Hello, World!";
 
         @JsonProperty("timeMillis")
         public long getTimestamp() {
@@ -230,8 +252,9 @@ public class Application {
 
         @JsonProperty("message")
         public String getName() {
-            return "log4j2-elasticsearch-ahc-one-jar example";
+            return name;
         }
 
     }
+
 }
