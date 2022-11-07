@@ -24,6 +24,7 @@ import org.appenders.log4j2.elasticsearch.ExtendedObjectMapper;
 import org.appenders.log4j2.elasticsearch.FailoverPolicy;
 import org.appenders.log4j2.elasticsearch.IndexTemplate;
 import org.appenders.log4j2.elasticsearch.ItemSource;
+import org.appenders.log4j2.elasticsearch.JacksonDeserializer;
 import org.appenders.log4j2.elasticsearch.JacksonSerializer;
 import org.appenders.log4j2.elasticsearch.MillisFormatter;
 import org.appenders.log4j2.elasticsearch.NoopFailoverPolicy;
@@ -49,20 +50,31 @@ import org.appenders.log4j2.elasticsearch.hc.HCHttp;
 import org.appenders.log4j2.elasticsearch.hc.HttpClientFactory;
 import org.appenders.log4j2.elasticsearch.hc.HttpClientProvider;
 import org.appenders.log4j2.elasticsearch.hc.SyncStepProcessor;
+import org.appenders.log4j2.elasticsearch.metrics.BasicMetricOutputsRegistry;
+import org.appenders.log4j2.elasticsearch.metrics.BasicMetricsRegistry;
+import org.appenders.log4j2.elasticsearch.metrics.MetricConfigFactory;
+import org.appenders.log4j2.elasticsearch.metrics.MetricLog;
+import org.appenders.log4j2.elasticsearch.metrics.MetricType;
+import org.appenders.log4j2.elasticsearch.metrics.ScheduledMetricsProcessor;
 
+import java.time.Clock;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 public class Application {
 
+    public static final String MODULE_NAME = "log4j2-elasticsearch-hc-one-jar";
+
     static {
         InternalLogging.setLogger(createLogger());
     }
 
-    private static int batchSize = 1000;
-    private static int concurrentBatches = 3;
-    private static int estimatedItemSizeInBytes = 1024;
+    // TODO: configure?
+    private static final int BATCH_SIZE = 1024;
+    private static final int CONCURRENT_BATCHES = 1;
+    private static final int ESTIMATED_ITEM_SIZE_IN_BYTES = 1024;
 
     public static void main(String[] args) {
         System.out.println("Start");
@@ -111,7 +123,7 @@ public class Application {
 
     private static MillisFormatter createIndexNameFormatter() {
         return new RollingMillisFormatter.Builder()
-                    .withPrefix("log4j2-elasticsearch-one-jar")
+                    .withPrefix(MODULE_NAME)
                     .withSeparator(".")
                     .withPattern("yyyy-MM-dd-ss")
                     .build();
@@ -122,15 +134,15 @@ public class Application {
     }
 
     private static PooledItemSourceFactory<Event, ByteBuf> createItemSourcePool(String poolName) {
-        return createItemSourcePool(poolName, concurrentBatches * batchSize, estimatedItemSizeInBytes);
+        return createItemSourcePool(poolName, CONCURRENT_BATCHES * BATCH_SIZE, ESTIMATED_ITEM_SIZE_IN_BYTES);
     }
 
     private static BatchDelivery<ItemSource<ByteBuf>> createBatchDelivery() {
         final PooledItemSourceFactory<Event, ByteBuf> batchItemSourceFactory =
-                createItemSourcePool("batchPool", concurrentBatches, estimatedItemSizeInBytes * batchSize);
-        BackoffPolicy<BatchRequest> backoffPolicy = new BatchLimitBackoffPolicy<>(concurrentBatches);
+                createItemSourcePool("batchPool", CONCURRENT_BATCHES, ESTIMATED_ITEM_SIZE_IN_BYTES * BATCH_SIZE);
+        BackoffPolicy<BatchRequest> backoffPolicy = new BatchLimitBackoffPolicy<>(CONCURRENT_BATCHES);
         return createBatchDelivery(
-                batchSize,
+                BATCH_SIZE,
                 createClientObjectFactory(batchItemSourceFactory, backoffPolicy),
                 createIndexTemplate(),
                 createNoopFailoverPolicy()
@@ -143,28 +155,30 @@ public class Application {
 
     private static IndexTemplate createIndexTemplate() {
         return new IndexTemplate.Builder()
-                .withApiVersion(7)
-                .withName("log4j2-elasticsearch-programmatic-test-template")
+                .withApiVersion(7) // use 8 for ES8
+                .withName(MODULE_NAME)
                 .withPath("classpath:indexTemplate.json")
                 .build();
     }
 
     private static ClientObjectFactory createClientObjectFactory(PooledItemSourceFactory itemSourceFactory, BackoffPolicy<BatchRequest> backoffPolicy) {
 
-        final ElasticsearchBulkAPI builderFactory = new ElasticsearchBulkAPI(null);
+        final ElasticsearchBulkAPI builderFactory = new ElasticsearchBulkAPI();
 
         final HttpClientProvider clientProvider = new HttpClientProvider(new HttpClientFactory.Builder()
                 .withServerList(Collections.singletonList("http://localhost:9200"))
                 .withConnTimeout(500)
                 .withReadTimeout(20000)
-                .withIoThreadCount(concurrentBatches)
-                .withMaxTotalConnections(concurrentBatches));
+                .withIoThreadCount(CONCURRENT_BATCHES)
+                .withMaxTotalConnections(CONCURRENT_BATCHES));
 
         return new HCHttp.Builder()
                 .withClientProvider(clientProvider)
                 .withBatchOperations(new HCBatchOperations(itemSourceFactory, builderFactory))
                 .withBackoffPolicy(backoffPolicy)
                 .withOperationFactory(createSetupOperationFactory(clientProvider))
+                .withName("http-main")
+                .withMetricConfigs(HCHttp.metricConfigs(true))
                 .build();
     }
 
@@ -176,7 +190,7 @@ public class Application {
         final ValueResolver valueResolver = getValueResolver();
 
         return new ElasticsearchOperationFactory(
-                new SyncStepProcessor(clientProvider, objectReader),
+                new SyncStepProcessor(clientProvider, new JacksonDeserializer<>(objectReader)),
                 valueResolver);
 
     }
@@ -209,20 +223,27 @@ public class Application {
                 .withPoolName(poolName)
                 .withInitialPoolSize(initialPoolSize)
                 .withPooledObjectOps(new ByteBufPooledObjectOps(UnpooledByteBufAllocator.DEFAULT, new ByteBufBoundedSizeLimitPolicy(estimatedItemSizeInBytes, estimatedItemSizeInBytes)))
-                .withMonitored(true)
-                .withMonitorTaskInterval(10000)
+                .withMetricConfigs(Arrays.asList(
+                        MetricConfigFactory.createSuppliedConfig(MetricType.COUNT, true, "available"),
+                        MetricConfigFactory.createSuppliedConfig(MetricType.COUNT, true, "total")
+                ))
                 .build();
     }
 
     private static BatchDelivery createBatchDelivery(int batchSize, ClientObjectFactory httpObjectFactory, IndexTemplate indexTemplate, FailoverPolicy failoverPolicy) {
+
+        final BasicMetricOutputsRegistry metricOutputs = new BasicMetricOutputsRegistry();
+        metricOutputs.register(new MetricLog("example-metrics", new ConsoleLogger()));
+
         return AsyncBatchDelivery.newBuilder()
-                    .withClientObjectFactory(httpObjectFactory)
-                    .withBatchSize(batchSize)
-                    .withDeliveryInterval(1000)
-                    .withSetupOpSources(indexTemplate)
-                    .withFailoverPolicy(failoverPolicy)
-                    .withShutdownDelayMillis(10000)
-                    .build();
+                .withClientObjectFactory(httpObjectFactory)
+                .withBatchSize(batchSize)
+                .withDeliveryInterval(1000)
+                .withSetupOpSources(indexTemplate)
+                .withFailoverPolicy(failoverPolicy)
+                .withShutdownDelayMillis(10000)
+                .withMetricProcessor(new ScheduledMetricsProcessor(500, 5000, Clock.systemDefaultZone(), new BasicMetricsRegistry(), metricOutputs))
+                .build();
     }
 
     private static ChronicleMapRetryFailoverPolicy createChronicleMapFailoverPolicy(KeySequenceSelector keySequenceSelector) {
@@ -242,7 +263,7 @@ public class Application {
 
         private final long timestamp = System.currentTimeMillis();
 
-        private final String name = "fatjar-event";
+        private final String name = "Hello, World!";
 
         @JsonProperty("timeMillis")
         public long getTimestamp() {
@@ -255,4 +276,5 @@ public class Application {
         }
 
     }
+
 }
