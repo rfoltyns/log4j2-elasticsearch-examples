@@ -3,39 +3,54 @@
     <Appenders>
         <Console name="CONSOLE" />
 
-        <!-- This configuration is much more verbose than the minimal one (few lines). It's here just to demonstrate the optional features -->
         <Elasticsearch name="elasticsearch">
-            <RollingIndexName indexName="log4j2-elasticsearch-hc-springboot-es-7-test" pattern="yyyy-MM-dd-HH" timeZone="Europe/Warsaw" />
-            <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
-            <JacksonJsonLayout singleThread="true" afterburner="true">
-                <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
-                <VirtualProperty name="ctxVariable" value="$${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}" dynamic="true" />
-                <PooledItemSourceFactory poolName="itemPool" itemSizeInBytes="1024" initialPoolSize="6000"
-                                         monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
-                    <UnlimitedResizePolicy resizeFactor="0.6" />
+            <IndexName indexName="log4j2-${sys:elastic.apm.service_name}"/>
+            <JacksonJsonLayout>
+                <JacksonMixIn targetClass="org.apache.logging.log4j.core.LogEvent" mixInClass="org.appenders.log4j2.elasticsearch.ecs.LogEventJacksonEcsJsonMixIn"/>
+                <NonEmptyFilter/>
+                <VirtualProperty name="host.name" value="$${sys:hostName}.examble.de"/>
+                <VirtualProperty name="service.version" value="$${sys:elastic.apm.service_version}"/>
+                <VirtualProperty name="service.name" value="$${sys:elastic.apm.service_name}"/>
+                <VirtualProperty name="data_stream.type" value="logs"/>
+                <VirtualProperty name="data_stream.dataset" value="$${sys:elastic.apm.service_name}.examble.de"/>
+                <VirtualProperty name="data_stream.namespace" value="$${sys:elastic.apm.environment}.examble.de"/>
+                <VirtualProperty name="client.ip" value="$${ctx:client.ip}"/>
+                <PooledItemSourceFactory poolName="itemPool"
+                                         itemSizeInBytes="1024"
+                                         maxItemSizeInBytes="8192"
+                                         initialPoolSize="500"
+                                         monitored="true"
+                                         monitorTaskInterval="10000"
+                                         resizeTimeout="500">
+                    <UnlimitedResizePolicy resizeFactor="0.6"/>
                 </PooledItemSourceFactory>
             </JacksonJsonLayout>
-            <AsyncBatchDelivery batchSize="2000" deliveryInterval="1000">
-                <IndexTemplate name="log4j2-elasticsearch-hc-springboot-es-7-test-template" path="classpath:indexTemplate-7.json" apiVersion="7" />
-                <HCHttp serverUris="http://localhost:9200"
-                          connTimeout="500"
-                          readTimeout="30000"
-                          maxTotalConnections="8">
-                    <PooledItemSourceFactory poolName="batchPool" itemSizeInBytes="2048000" initialPoolSize="3"
-                                             monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
-                        <UnlimitedResizePolicy resizeFactor="0.70" />
+
+            <AsyncBatchDelivery batchSize="500" deliveryInterval="5000">
+                <ComponentTemplate name="apm-ecs-test-settings" path="classpath:componentTemplate-7-settings.json"/>
+                <ComponentTemplate name="apm-ecs-test-settings-ilm" path="classpath:componentTemplate-7-settings-ilm.json"/>
+                <IndexTemplate apiVersion="8" name="log4j2-test-template" path="classpath:composableIndexTemplate-7.json"/>
+                <ILMPolicy name="apm-test-ilm-policy" createBootstrapIndex="false" path="classpath:ilmPolicy-7.json">
+                </ILMPolicy>
+                <AHCHttp name="http-main"
+                         connTimeout="500"
+                         readTimeout="30000"
+                         gzipCompression="true"
+                         maxTotalConnections="8"
+                         serverUris="http://localhost:9200">
+                    <PooledItemSourceFactory poolName="batchPool"
+                                             itemSizeInBytes="5120000"
+                                             initialPoolSize="10"
+                                             resizeTimeout="500">
+                        <UnlimitedResizePolicy resizeFactor="0.70"/>
                     </PooledItemSourceFactory>
-                    <BatchLimitBackoffPolicy maxBatchesInFlight="4" />
-                </HCHttp>
-                <ChronicleMapRetryFailoverPolicy fileName="failedItems.chronicleMap"
-                                                 numberOfEntries="100000"
-                                                 averageValueSize="2048"
-                                                 batchSize="1000"
-                                                 retryDelay="4000"
-                                                 monitored="true"
-                                                 monitorTaskInterval="30000">
-                    <SingleKeySequenceSelector sequenceId="2"/>
-                </ChronicleMapRetryFailoverPolicy>
+                    <ElasticsearchDataStream />
+                    <BatchLimitBackoffPolicy maxBatchesInFlight="4"/>
+                    <ServiceDiscovery
+                            refreshInterval="5000"
+                            configPolicies="serverList">
+                    </ServiceDiscovery>
+                </AHCHttp>
             </AsyncBatchDelivery>
         </Elasticsearch>
     </Appenders>

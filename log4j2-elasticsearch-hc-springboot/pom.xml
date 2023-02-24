@@ -21,7 +21,7 @@
     <dependencies>
         <dependency>
             <groupId>org.appenders.log4j</groupId>
-            <artifactId>log4j2-elasticsearch-hc</artifactId>
+            <artifactId>log4j2-elasticsearch-ahc</artifactId>
             <version>${appenders.version}</version>
         </dependency>
         <!-- Because single-threaded serialisation is more memory efficient (optional) -->

@@ -1,10 +1,10 @@
 {
   "index_patterns": [
-    "log4j2-elasticsearch-hc-springboot-es-7-*"
+    "log4j2-${sys:elastic.apm.service_name}*"
   ],
+  "data_stream": {},
   "composed_of": [
-    "log4j2-elasticsearch-hc-springboot-es-7-test-settings",
-    "log4j2-elasticsearch-hc-springboot-es-7-test-settings-ilm",
-    "log4j2-elasticsearch-hc-springboot-es-7-test-mappings"
+    "apm-ecs-test-settings",
+    "apm-ecs-test-settings-ilm"
   ]
 }
