@@ -1,0 +1,73 @@
+Configuration:
+    status: INFO
+    Appenders:
+      Console:
+        - name: CONSOLE
+      Elasticsearch:
+        - name: elasticsearch
+          IndexName:
+            - indexName: log4j2-elasticsearch-hc-springboot-es-7-test
+          JacksonJsonLayout:
+            NonEmptyFilter: {}
+            VirtualProperty:
+              - name: hostname
+                value: $${sys:hostName:-}
+              - name: ctxVariable
+                value: $${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}
+                dynamic: true
+            PooledItemSourceFactory:
+              - poolName: itemPool
+                itemSizeInBytes: 1024
+                maxItemSizeInBytes: 8192
+                initialPoolSize: 500
+                monitored: true
+                monitorTaskInterval: 10000
+                resizeTimeout: 500
+                UnlimitedResizePolicy:
+                  - resizeFactor: 0.6
+          AsyncBatchDelivery:
+            - batchSize: 500
+              deliveryInterval: 5000
+              ComponentTemplate:
+                - name: log4j2-elasticsearch-hc-springboot-es-7-test-settings
+                  path: classpath:componentTemplate-7-settings.json
+                - name: log4j2-elasticsearch-hc-springboot-es-7-test-settings-ilm
+                  path: classpath:componentTemplate-7-settings-ilm.json
+                - name: log4j2-elasticsearch-hc-springboot-es-7-test-mappings
+                  path: classpath:componentTemplate-7-mappings.json
+              IndexTemplate:
+                - apiVersion: 8
+                  name: log4j2-elasticsearch-hc-springboot-es-7-test-template
+                  path: classpath:composableIndexTemplate-7.json
+              ILMPolicy:
+                - name: log4j2-elasticsearch-hc-springboot-es-7-test-ilm-policy
+                  createBootstrapIndex: true
+                  rolloverAlias: log4j2-elasticsearch-hc-springboot-es-7-test
+                  path: classpath:ilmPolicy-7.json
+              HCHttp:
+                - name: http-main
+                  connTimeout: 500
+                  readTimeout: 30000
+                  maxTotalConnections: 8
+                  serverUris: http://localhost:9200
+                  PooledItemSourceFactory:
+                    - poolName: batchPool
+                      itemSizeInBytes: 5120000
+                      initialPoolSize: 10
+                      resizeTimeout: 500
+                      UnlimitedResizePolicy:
+                        - resizeFactor: 0.70
+                  BatchLimitBackoffPolicy:
+                    - maxBatchesInFlight: 4
+                  ServiceDiscovery:
+                    - refreshInterval: 5000
+                      configPolicies: serverList
+    Loggers:
+      AsyncLogger:
+        - name: elasticsearch
+          AppenderRef:
+            - ref: elasticsearch
+      Root:
+        - level: info
+          AppenderRef:
+            - ref: CONSOLE
