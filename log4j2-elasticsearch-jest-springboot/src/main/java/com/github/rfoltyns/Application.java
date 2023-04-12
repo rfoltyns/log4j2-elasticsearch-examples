@@ -22,6 +22,7 @@ public class Application {
         Logger logger = LogManager.getLogger("elasticsearch");
 
         ThreadContext.put("myFavouriteVariable", UUID.randomUUID().toString());
+        ThreadContext.put("anotherFavVariable", "");
         ThreadContext.put("myStructuredJSON", "{\"yes\":100,\"you\":\"can\"}");
         logger.info("Hello, World!");
         ThreadContext.remove("myFavouriteVariable");

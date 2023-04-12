@@ -8,8 +8,10 @@
             <RollingIndexName indexName="log4j2-elasticsearch-jest-springboot-es-7-test" pattern="yyyy-MM-dd-HH" timeZone="Europe/Warsaw" />
             <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
             <JacksonJsonLayout singleThread="true" afterburner="true">
+                <NonEmptyFilter/>
                 <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
                 <VirtualProperty name="ctxVariable" value="$${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}" dynamic="true" />
+                <VirtualProperty name="anotherVariable" value="$${ctx:anotherFavVariable:-}" dynamic="true" />
                 <PooledItemSourceFactory poolName="itemPool" itemSizeInBytes="1024" initialPoolSize="6000"
                                          monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
                     <UnlimitedResizePolicy resizeFactor="0.6" />
