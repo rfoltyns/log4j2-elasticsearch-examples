@@ -1,0 +1,72 @@
+Configuration:
+  status: INFO
+  Appenders:
+    Console:
+      - name: CONSOLE
+    Elasticsearch:
+      - name: elasticsearch
+        RollingIndexName:
+          - indexName: log4j2-elasticsearch-jest-springboot-es-7-test
+            pattern: yyyy-MM-dd-HH
+            timeZone: Europe/Warsaw
+        ThresholdFilter:
+          - level: INFO
+            onMatch: ACCEPT
+        JacksonJsonLayout:
+          - singleThread: true
+            afterburner: true
+            NonEmptyFilter: {}
+            VirtualProperty:
+              - name: hostname
+                value: $${sys:hostname:-undefined}
+              - name: ctxVariable
+                value: $${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}
+                dynamic: true
+              - name: anotherFavVariable
+                value: $${ctx:anotherFavVariable:-}
+                dynamic: true
+            PooledItemSourceFactory:
+              - poolName: itemPool
+                itemSizeInBytes: 1024
+                initialPoolSize: 6000
+                monitored: true
+                monitorTaskInterval: 10000
+                resizeTimeout: 500
+                UnlimitedResizePolicy:
+                  - resizeFactor: 0.6
+        AsyncBatchDelivery:
+          - batchSize: 2000
+            deliveryInterval: 1000
+            IndexTemplate:
+              - name: log4j2-elasticsearch-jest-springboot-es-7-test
+                path: classpath:indexTemplate-7.json
+                apiVersion: 7
+            JestBufferedHttp:
+              - serverUris: http://localhost:9200
+                connTimeout: 500
+                readTimeout: 30000
+                maxTotalConnection: 8
+                defaultMaxTotalConnectionPerRoute: 8
+                mappingType: _doc
+                PooledItemSourceFactory:
+                  - poolName: batchPool
+                    itemSizeInBytes: 2048000
+                    initialPoolSize: 3
+                    monitored: true
+                    monitorTaskInterval: 10000
+                    resizeTimeout: 500
+                    UnlimitedResizePolicy:
+                      - resizeFactor: 0.70
+                BatchLimitBackoffPolicy:
+                  - maxBatchesInFlight: 4
+  Loggers:
+    AsyncLogger:
+      - name: elasticsearch
+        level: info
+        AppenderRef:
+          - ref: elasticsearch
+            level: info
+    Root:
+      - level: info
+        AppenderRef:
+          - ref: CONSOLE
