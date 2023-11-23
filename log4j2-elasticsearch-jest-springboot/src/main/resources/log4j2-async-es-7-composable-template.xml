@@ -3,9 +3,9 @@
     <Appenders>
         <Console name="CONSOLE" />
 
-        <!-- This is a minimal configuration compatible with Elasticsearch 7.x (batch and pool sizes and intervals should be adjusted to your needs) -->
+        <!-- This is a minimal configuration compatible with Elasticsearch 7.8+ (batch and pool sizes and intervals should be adjusted to your needs) -->
         <Elasticsearch name="elasticsearch">
-            <IndexName indexName="log4j2-elasticsearch-jest-springboot-es-7-test" />
+            <IndexName indexName="log4j2-elasticsearch-jest-springboot" />
             <JacksonJsonLayout>
                 <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
                 <VirtualProperty name="ctxVariable" value="$${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}" dynamic="true" />
@@ -14,16 +14,16 @@
             <AsyncBatchDelivery batchSize="2000" deliveryInterval="1000">
                 <!-- Use 'classpath:BOOT-INF/classes/<template file name>' if template file is in the Spring Boot app resources (yes, it's ugly) -->
                 <!-- Use 'classpath:<template file name>' if template file is provided by one of your dependencies -->
-                <ComponentTemplate name="log4j2-elasticsearch-jest-springboot-es-7-test-settings"
+                <ComponentTemplate name="log4j2-elasticsearch-jest-springboot-settings"
                                    path="classpath:componentTemplate-7-settings.json" />
-                <ComponentTemplate name="log4j2-elasticsearch-jest-springboot-es-7-test-settings-ilm"
+                <ComponentTemplate name="log4j2-elasticsearch-jest-springboot-settings-ilm"
                                    path="classpath:componentTemplate-7-settings-ilm.json" />
-                <ComponentTemplate name="log4j2-elasticsearch-jest-springboot-es-7-test-mappings"
+                <ComponentTemplate name="log4j2-elasticsearch-jest-springboot-mappings"
                                    path="classpath:componentTemplate-7-mappings.json" />
-                <IndexTemplate name="log4j2-elasticsearch-jest-springboot-es-7-test-composable-template"
+                <IndexTemplate name="log4j2-elasticsearch-jest-springboot-composable-template"
                                path="classpath:composableIndexTemplate-7.json"
                                apiVersion="8" />
-                <ILMPolicy name="log4j2-elasticsearch-jest-springboot-es-7-ilm-policy" rolloverAlias="log4j2-elasticsearch-jest-springboot-es-7-test" path="classpath:ilmPolicy-7.json" />
+                <ILMPolicy name="log4j2-elasticsearch-jest-springboot-ilm-policy" rolloverAlias="log4j2-elasticsearch-jest-springboot" path="classpath:ilmPolicy-7.json" />
                 <JestBufferedHttp serverUris="http://localhost:9200">
                     <PooledItemSourceFactory itemSizeInBytes="2048000" initialPoolSize="3" />
                 </JestBufferedHttp>

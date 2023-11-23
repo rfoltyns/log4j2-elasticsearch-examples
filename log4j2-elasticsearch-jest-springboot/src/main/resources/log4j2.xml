@@ -5,7 +5,7 @@
 
         <!-- This configuration is much more verbose than the minimal one (few lines). It's here just to demonstrate the optional features -->
         <Elasticsearch name="elasticsearch">
-            <RollingIndexName indexName="log4j2-elasticsearch-jest-springboot-es-7-test" pattern="yyyy-MM-dd-HH" timeZone="Europe/Warsaw" />
+            <RollingIndexName indexName="log4j2-elasticsearch-jest-springboot" pattern="yyyy-MM-dd-HH" timeZone="Europe/Warsaw" />
             <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
             <JacksonJsonLayout singleThread="true" afterburner="true">
                 <NonEmptyFilter/>
@@ -18,13 +18,12 @@
                 </PooledItemSourceFactory>
             </JacksonJsonLayout>
             <AsyncBatchDelivery batchSize="2000" deliveryInterval="1000">
-                <IndexTemplate name="log4j2-elasticsearch-jest-springboot-es-7-test" path="classpath:indexTemplate-7.json" apiVersion="7" />
+                <IndexTemplate name="log4j2-elasticsearch-jest-springboot" path="classpath:indexTemplate-8.json" apiVersion="8" />
                 <JestBufferedHttp serverUris="http://localhost:9200"
                           connTimeout="500"
                           readTimeout="30000"
                           maxTotalConnection="8"
-                          defaultMaxTotalConnectionPerRoute="8"
-                          mappingType="_doc">
+                          defaultMaxTotalConnectionPerRoute="8">
                     <PooledItemSourceFactory poolName="batchPool" itemSizeInBytes="2048000" initialPoolSize="3"
                                              monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
                         <UnlimitedResizePolicy resizeFactor="0.70" />

@@ -1,8 +1,8 @@
 {
   "template": {
     "settings": {
-      "lifecycle.name": "log4j2-elasticsearch-jest-springboot-es-7-test-ilm-policy",
-      "lifecycle.rollover_alias": "log4j2-elasticsearch-jest-springboot-es-7-test"
+      "lifecycle.name": "log4j2-elasticsearch-jest-springboot-ilm-policy",
+      "lifecycle.rollover_alias": "log4j2-elasticsearch-jest-springboot"
     }
   }
 }

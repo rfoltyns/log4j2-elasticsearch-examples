@@ -1,6 +1,6 @@
 {
   "index_patterns": [
-    "log4j2-elasticsearch-jest-springboot-es-7-*"
+    "log4j2-elasticsearch-jest-springboot*"
   ],
   "settings": {
     "index": {

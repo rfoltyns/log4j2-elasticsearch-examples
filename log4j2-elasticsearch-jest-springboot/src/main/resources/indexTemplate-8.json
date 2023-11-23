@@ -1,0 +1,20 @@
+{
+  "index_patterns": [
+    "log4j2-elasticsearch-jest-springboot*"
+  ],
+  "template": {
+    "settings": {
+      "index": {
+        "refresh_interval": "5s"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "timeMillis": {
+          "type": "date",
+          "format": "epoch_millis"
+        }
+      }
+    }
+  }
+}

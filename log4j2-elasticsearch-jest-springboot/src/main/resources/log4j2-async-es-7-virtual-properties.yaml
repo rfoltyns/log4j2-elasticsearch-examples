@@ -40,12 +40,14 @@ Configuration:
             IndexTemplate:
               - name: log4j2-elasticsearch-jest-springboot
                 path: classpath:indexTemplate-8.json
+                apiVersion: 7
             JestBufferedHttp:
               - serverUris: http://localhost:9200
                 connTimeout: 500
                 readTimeout: 30000
                 maxTotalConnection: 8
                 defaultMaxTotalConnectionPerRoute: 8
+                mappingType: _doc
                 PooledItemSourceFactory:
                   - poolName: batchPool
                     itemSizeInBytes: 2048000
