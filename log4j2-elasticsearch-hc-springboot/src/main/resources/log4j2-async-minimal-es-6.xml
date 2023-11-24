@@ -5,14 +5,14 @@
 
         <!-- This is a minimal configuration compatible with Elasticsearch 6.x (batch and pool sizes and intervals should be adjusted to your needs) -->
         <Elasticsearch name="elasticsearch">
-            <IndexName indexName="log4j2-elasticsearch-hc-springboot-es-6-test" />
+            <IndexName indexName="log4j2-elasticsearch-hc-springboot-6-test" />
             <JacksonJsonLayout>
                 <PooledItemSourceFactory itemSizeInBytes="1024" initialPoolSize="6000" />
             </JacksonJsonLayout>
             <AsyncBatchDelivery batchSize="2000" deliveryInterval="1000">
                 <!-- Use 'classpath:BOOT-INF/classes/<template file name>' if template file is in the Spring Boot app resources (yes, it's ugly) -->
                 <!-- Use 'classpath:<template file name>' if template file is provided by one of your dependencies -->
-                <IndexTemplate name="log4j2-elasticsearch-hc-springboot-es-6-test-template" path="classpath:indexTemplate-6.json" />
+                <IndexTemplate name="log4j2-elasticsearch-hc-springboot-6-test-template" path="classpath:indexTemplate-6.json" apiVersion="6" />
                 <HCHttp serverUris="http://localhost:9200" mappingType="index">
                     <PooledItemSourceFactory itemSizeInBytes="2048000" initialPoolSize="3" />
                 </HCHttp>

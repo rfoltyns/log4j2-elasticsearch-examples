@@ -1,5 +1,5 @@
 {
-  "template":"log4j2-elasticsearch-hc-springboot-es-6-*",
+  "template":"log4j2-elasticsearch-hc-springboot*",
   "settings": {
     "index": {
       "refresh_interval": "5s"

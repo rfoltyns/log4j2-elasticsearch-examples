@@ -1,0 +1,20 @@
+{
+  "index_patterns": [
+    "log4j2-elasticsearch-hc-springboot*"
+  ],
+  "template": {
+    "settings": {
+      "index.refresh_interval": "5s",
+      "lifecycle.name": "log4j2-elasticsearch-hc-springboot-ilm-policy",
+      "lifecycle.rollover_alias": "log4j2-elasticsearch-hc-springboot"
+    },
+    "mappings": {
+      "properties": {
+        "timeMillis": {
+          "type": "date",
+          "format": "epoch_millis"
+        }
+      }
+    }
+  }
+}

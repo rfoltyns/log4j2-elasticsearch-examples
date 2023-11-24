@@ -5,38 +5,38 @@
 
         <!-- This configuration is much more verbose than the minimal one (few lines). It's here just to demonstrate the optional features -->
         <Elasticsearch name="elasticsearch">
-            <RollingIndexName indexName="log4j2-elasticsearch-hc-springboot-es-7-test" pattern="yyyy-MM-dd-HH" timeZone="Europe/Warsaw" />
+            <RollingIndexName indexName="log4j2-elasticsearch-hc-springboot" pattern="yyyy-MM-dd-HH" timeZone="Europe/Warsaw" />
             <ThresholdFilter level="INFO" onMatch="ACCEPT"/>
-            <JacksonJsonLayout singleThread="true" afterburner="true">
-                <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
-                <VirtualProperty name="ctxVariable" value="$${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}" dynamic="true" />
-                <PooledItemSourceFactory poolName="itemPool" itemSizeInBytes="1024" initialPoolSize="6000"
-                                         monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
-                    <UnlimitedResizePolicy resizeFactor="0.6" />
-                </PooledItemSourceFactory>
-            </JacksonJsonLayout>
             <AsyncBatchDelivery batchSize="2000" deliveryInterval="1000">
-                <IndexTemplate name="log4j2-elasticsearch-hc-springboot-es-7-test-template" path="classpath:indexTemplate-7.json" apiVersion="7" />
+                <IndexTemplate name="log4j2-elasticsearch-hc-springboot-template" path="classpath:indexTemplate-8.json" />
                 <HCHttp serverUris="http://localhost:9200"
-                          connTimeout="500"
-                          readTimeout="30000"
-                          maxTotalConnections="8">
+                        connTimeout="500"
+                        readTimeout="30000"
+                        maxTotalConnections="8">
                     <PooledItemSourceFactory poolName="batchPool" itemSizeInBytes="2048000" initialPoolSize="3"
-                                             monitored="true" monitorTaskInterval="10000" resizeTimeout="500">
+                                             monitored="false" monitorTaskInterval="10000" resizeTimeout="500">
                         <UnlimitedResizePolicy resizeFactor="0.70" />
                     </PooledItemSourceFactory>
                     <BatchLimitBackoffPolicy maxBatchesInFlight="4" />
                 </HCHttp>
-                <ChronicleMapRetryFailoverPolicy fileName="failedItems.chronicleMap"
-                                                 numberOfEntries="100000"
-                                                 averageValueSize="2048"
-                                                 batchSize="1000"
-                                                 retryDelay="4000"
-                                                 monitored="true"
-                                                 monitorTaskInterval="30000">
-                    <SingleKeySequenceSelector sequenceId="2"/>
-                </ChronicleMapRetryFailoverPolicy>
+<!--                <ChronicleMapRetryFailoverPolicy fileName="failedItems.chronicleMap"-->
+<!--                                                 numberOfEntries="100000"-->
+<!--                                                 averageValueSize="2048"-->
+<!--                                                 batchSize="1000"-->
+<!--                                                 retryDelay="1000"-->
+<!--                                                 monitored="true"-->
+<!--                                                 monitorTaskInterval="30000">-->
+<!--                    <SingleKeySequenceSelector sequenceId="2"/>-->
+<!--                </ChronicleMapRetryFailoverPolicy>-->
             </AsyncBatchDelivery>
+            <JacksonJsonLayout singleThread="true" afterburner="true">
+                <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
+                <VirtualProperty name="ctxVariable" value="$${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}" dynamic="true" />
+                <PooledItemSourceFactory poolName="itemPool" itemSizeInBytes="1024" initialPoolSize="6000"
+                                         monitored="false" monitorTaskInterval="10000" resizeTimeout="500">
+                    <UnlimitedResizePolicy resizeFactor="0.6" />
+                </PooledItemSourceFactory>
+            </JacksonJsonLayout>
         </Elasticsearch>
     </Appenders>
 

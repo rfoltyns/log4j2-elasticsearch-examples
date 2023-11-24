@@ -1,0 +1,15 @@
+{
+  "template": {
+    "settings": {
+      "refresh_interval": "5s"
+    },
+    "mappings": {
+      "properties": {
+        "timeMillis": {
+          "type": "date",
+          "format": "epoch_millis"
+        }
+      }
+    }
+  }
+}
