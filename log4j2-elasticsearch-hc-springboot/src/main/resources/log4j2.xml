@@ -30,6 +30,9 @@
 <!--                </ChronicleMapRetryFailoverPolicy>-->
             </AsyncBatchDelivery>
             <JacksonJsonLayout singleThread="true" afterburner="true">
+                <ExampleJacksonModule/>
+                <JacksonMixIn mixInClass="com.github.rfoltyns.CustomLogEventMixIn"
+                              targetClass="org.apache.logging.log4j.core.LogEvent"/>
                 <VirtualProperty name="hostname" value="$${sys:hostname:-undefined}" />
                 <VirtualProperty name="ctxVariable" value="$${ctx:myFavouriteVariable:-notSupportedWithAsyncLogger}" dynamic="true" />
                 <PooledItemSourceFactory poolName="itemPool" itemSizeInBytes="1024" initialPoolSize="6000"
